@@ -11,8 +11,34 @@ public class ThirdPersonController : MonoBehaviour
     public float turnSmoothTime = 0.1f;
     public float turnSmoothVelocity;
 
+    #region Gravity
+
+    public float gravity = -19.81f;
+
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
+
+    Vector3 velocity;
+    bool isGrounded;
+
+    #endregion
+
+    public float jumpHeight = 1f;
+
     void Update()
     {
+        #region Gravity
+
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        } 
+
+        #endregion
+
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
@@ -28,5 +54,22 @@ public class ThirdPersonController : MonoBehaviour
 
             controller.Move(movDir.normalized * speed * Time.deltaTime);
         }
+
+        #region Jump
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2 * gravity);
+        }
+
+        #endregion
+
+        #region Gravity
+
+        velocity.y += gravity * Time.deltaTime;
+
+        controller.Move(velocity * Time.deltaTime);
+
+        #endregion
     }
 }
